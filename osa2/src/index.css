@@ -1,0 +1,44 @@
+.deleteNotification {
+    color: rgb(222, 10, 10);
+    background: lightgrey;
+    padding-top: 5px;
+    font-size: 20px;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.addNotification {
+    color: green;
+    background: lightgrey;
+    padding-top: 5px;
+    font-size: 20px;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+
+}
+
+.updateNotification {
+    color: green;
+    background: lightgrey;
+    padding-top: 5px;
+    font-size: 20px;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.errorNotification{
+    color: rgb(254, 3, 3);
+    background: lightgrey;
+    padding-top: 5px;
+    font-size: 20px;
+    border-style: solid;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px; 
+}
