@@ -1,6 +1,9 @@
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
+const mongoose = require('mongoose')
+const { default: persons } = require('../frontend/src/services/persons')
+
 
 const app = express()
 
@@ -32,35 +35,66 @@ app.use(morgan(function (tokens, request, response) {
 
 
 
-let notes = [
-  {
-    id: "1",
-    name: "Arto Hellas",
-    number: "040-123456"
-  },
-  {
-    id: "2",
-    name: "Ada Lovelace",
-    number: "39-44-5323523"
-  },
-  {
-    id: "3",
-    name: "Dan Abramov",
-    number: "12-43-234345"
-  },
-  {
-    id: "4",
-    name: "Mary Poppendieck",
-    number: "39-23-6423122"
+//let persons = [
+  //{
+    //id: "1",
+    //name: "Arto Hellas",
+    //number: "040-123456"
+  //},
+  //{
+    //id: "2",
+    //name: "Ada Lovelace",
+    //number: "39-44-5323523"
+  //},
+  //{
+    //id: "3",
+    //name: "Dan Abramov",
+    //number: "12-43-234345"
+  //},
+  //{
+    //id: "4",
+    //name: "Mary Poppendieck",
+    //number: "39-23-6423122"
+  //}
+//]
+
+//app.get('/api/persons', (request, response) => {
+  //response.json(persons)
+//})
+
+const password = process.argv[2]
+const Password = encodeURIComponent(password)
+const url = `mongodb+srv://maijarislakki_db_user:${Password}@cluster0.ombojxl.mongodb.net/personApp?retryWrites=true&w=majority&appName=Cluster0`
+
+
+mongoose.set('strictQuery',false)
+mongoose.connect(url, { family: 4 })
+
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String
+})
+
+
+
+personSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
   }
-]
+})
+
+const Person = mongoose.model('Person', personSchema)
 
 app.get('/api/persons', (request, response) => {
-  response.json(notes)
+  Person.find({}).then(persons => {
+    response.json(persons)
+  })
 })
 
 app.get('/api/info',(request, response) => {
-    const info = notes.length
+    const info = persons.length
     const today = new Date()
     const dayWord = today.getDay()
     const day = today.getDate()
@@ -82,7 +116,7 @@ app.get('/api/info',(request, response) => {
 
     app.get('/api/persons/:id',(request, response) => {
         const id = request.params.id
-        const person = notes.find(person => person.id === id)
+        const person = persons.find(person => person.id === id)
         if (person) {
         response.json(person)
     } else {
@@ -93,14 +127,14 @@ app.get('/api/info',(request, response) => {
 
     app.delete('/api/persons/:id',(request, response) => {
         const id = request.params.id
-        notes = notes.filter(note => note.id !== id)
+        persons = persons.filter(note => note.id !== id)
 
         response.status(204).end()
     })
 
     const generateId = () => {
-        const maxId = notes.length > 0
-            ? Math.max(...notes.map(n => Number(n.id)))
+        const maxId = persons.length > 0
+            ? Math.max(...persons.map(n => Number(n.id)))
             : 0
         return String(maxId + 1)
         }
@@ -116,18 +150,14 @@ app.get('/api/info',(request, response) => {
             return response.status(400).json({ error: 'number missing' })
         }
         
-        if (notes.map(n => n.name).includes(body.name))
-        {            
-        return response.status(400).json({ error: 'name must be unique' })
-    }
-        const person = {
-            id: generateId(),
+        const person = new Person({
             name: body.name,
             number: body.number,
-        }
+        })
         
-        notes = notes.concat(person)
-        response.json(person)
+        person.save().then(savedPerson => {
+            response.json(savedPerson)
+        })
     })
 
 const PORT = process.env.PORT || 3001
