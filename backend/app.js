@@ -93,6 +93,14 @@ app.get('/api/persons', (request, response) => {
   })
 })
 
+app.delete('/api/persons/:id',(request, response, next) => {
+    const id = request.params.id
+    Person.findByIdAndDelete(id).then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
+})
+
 app.get('/api/info',(request, response) => {
     const info = persons.length
     const today = new Date()
@@ -125,12 +133,6 @@ app.get('/api/info',(request, response) => {
 
     })
 
-    app.delete('/api/persons/:id',(request, response) => {
-        const id = request.params.id
-        persons = persons.filter(note => note.id !== id)
-
-        response.status(204).end()
-    })
 
     const generateId = () => {
         const maxId = persons.length > 0
