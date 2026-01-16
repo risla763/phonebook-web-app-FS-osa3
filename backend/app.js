@@ -34,34 +34,6 @@ app.use(morgan(function (tokens, request, response) {
 }))
 
 
-
-//let persons = [
-  //{
-    //id: "1",
-    //name: "Arto Hellas",
-    //number: "040-123456"
-  //},
-  //{
-    //id: "2",
-    //name: "Ada Lovelace",
-    //number: "39-44-5323523"
-  //},
-  //{
-    //id: "3",
-    //name: "Dan Abramov",
-    //number: "12-43-234345"
-  //},
-  //{
-    //id: "4",
-    //name: "Mary Poppendieck",
-    //number: "39-23-6423122"
-  //}
-//]
-
-//app.get('/api/persons', (request, response) => {
-  //response.json(persons)
-//})
-
 const password = process.argv[2]
 const Password = encodeURIComponent(password)
 const url = `mongodb+srv://maijarislakki_db_user:${Password}@cluster0.ombojxl.mongodb.net/personApp?retryWrites=true&w=majority&appName=Cluster0`
@@ -86,6 +58,19 @@ personSchema.set('toJSON', {
 })
 
 const Person = mongoose.model('Person', personSchema)
+
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  }
+
+  next(error)
+}
+
+
+
 
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(persons => {
@@ -122,16 +107,17 @@ app.get('/api/info',(request, response) => {
 
 
 
-    app.get('/api/persons/:id',(request, response) => {
-        const id = request.params.id
-        const person = persons.find(person => person.id === id)
-        if (person) {
-        response.json(person)
+app.get('/api/persons/:id',(request, response, next) => {
+  const id = request.params.id
+  Person.findById(id).then(person => {
+    if (person) {
+      response.json(person)
     } else {
-        response.status(404).end()
+      response.status(404).end()
     }
-
-    })
+  })
+  .catch(error => next(error))
+})
 
 
     const generateId = () => {
@@ -166,3 +152,5 @@ const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+app.use(errorHandler)
