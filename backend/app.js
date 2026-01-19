@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
@@ -34,22 +35,22 @@ app.use(morgan(function (tokens, request, response) {
 }))
 
 
-const password = process.argv[2]
-const Password = encodeURIComponent(password)
-const url = `mongodb+srv://maijarislakki_db_user:${Password}@cluster0.ombojxl.mongodb.net/personApp?retryWrites=true&w=majority&appName=Cluster0`
+// .env tiedostossa reitti url:lle
 
+const url = process.env.MONGODB_URI 
 
 mongoose.set('strictQuery',false)
 mongoose.connect(url, { family: 4 })
 
-const personSchema = new mongoose.Schema({
+// person schema
+const peopleSchema = new mongoose.Schema({
   name: String,
   number: String
 })
 
 
 
-personSchema.set('toJSON', {
+peopleSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
@@ -57,8 +58,9 @@ personSchema.set('toJSON', {
   }
 })
 
-const Person = mongoose.model('Person', personSchema)
+const Person = mongoose.model('Person', peopleSchema)
 
+//uusi virheiden käsittelijä
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
@@ -69,12 +71,12 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
-
+//
 
 
 app.get('/api/persons', (request, response) => {
-  Person.find({}).then(persons => {
-    response.json(persons)
+  Person.find({}).then(people => {
+    response.json(people)
   })
 })
 
@@ -148,7 +150,7 @@ app.get('/api/persons/:id',(request, response, next) => {
         })
     })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT //|| 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
