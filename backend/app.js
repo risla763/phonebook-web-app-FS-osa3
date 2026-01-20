@@ -78,7 +78,8 @@ app.delete('/api/persons/:id',(request, response, next) => {
 })
 
 app.get('/api/info',(request, response) => {
-    const info = persons.length
+  Person.countDocuments({}).then(count => {
+
     const today = new Date()
     const dayWord = today.getDay()
     const day = today.getDate()
@@ -91,9 +92,11 @@ app.get('/api/info',(request, response) => {
     const days = ["Sunday", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const wordDay = days[dayWord]
     const monthWord = months[month]
-    const message = `Phonebook has info for ${info} people. 
+    const message = `Phonebook has info for ${count} people. 
                                                                              ${monthWord} ${wordDay} ${day} ${year} ${hours}:${minutes}:${seconds} GMT+0200 (Eastern European Standard Time)`
-    response.end(message)
+    response.send(message)
+  })
+  .catch(error => next(error))
 })
 
 
@@ -136,6 +139,17 @@ const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
 
+app.put('/api/persons/:id', (request, response, next) => {
+  const id = request.params.id
+  const body = request.body
+  console.log('puttiin tultu', body)
+  Person.findById(id).then(person => {
+    person.number = body.number
+    person.save()
+    return
+  })
+  .catch(error => next(error))
+})
 
 
 const PORT = process.env.PORT //|| 3001
