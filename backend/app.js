@@ -44,7 +44,10 @@ mongoose.connect(url, { family: 4 })
 
 // person schema
 const peopleSchema = new mongoose.Schema({
-  name: String,
+  name: { 
+    type: String,
+    minlength: 3
+  },
   number: String
 })
 
@@ -165,7 +168,11 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
+  } 
+  else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
   }
+  
 
   next(error)
 }

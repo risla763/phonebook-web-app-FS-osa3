@@ -63,7 +63,7 @@ const App = () => {
         id: String(persons.length + 1),
       }
 
-      axios
+
       personsService.create(personObject)
       .then(response => {
         console.log('uusi objekti tietokantaan', personObject)
@@ -73,6 +73,11 @@ const App = () => {
         setAddMessage(`Added ${newName}`)
         setTimeout(() => {
           setAddMessage(null)}, 5000)
+      })
+      .catch(error => {
+        console.error('Error', error.response.data)
+        setErrorMessage(error.response.data.error)
+        setTimeout(() => setErrorMessage(null), 5000)
       })
     } else {
     if (window.confirm(`${newName} is already added in phonebook, replace the old number with a new one?`)) {
