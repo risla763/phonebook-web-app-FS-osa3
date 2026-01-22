@@ -48,7 +48,16 @@ const peopleSchema = new mongoose.Schema({
     type: String,
     minlength: 3
   },
-  number: String
+  number: {
+    type: String,
+    minlength: 8,
+    validate: {
+      validator: function(v) {
+        return /^\d{2,3}-\d{3,}$/.test(v);
+      },
+      message: props => `${props.value} Number format has to have 2 or 3 numbers first then a hyphen and at least 3 numbers after it`
+    }
+  }
 })
 
 
