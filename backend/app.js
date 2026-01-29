@@ -155,8 +155,10 @@ app.put('/api/persons/:id', (request, response, next) => {
   console.log('Tuliko put koodiin?', body)
   Person.findById(id).then(person => {
     person.number = body.number
-    person.save()
-    return
+    return person.save()
+  })
+  .then(savedPerson => {
+        response.json(savedPerson)
   })
   .catch(error => next(error))
 })
