@@ -13,36 +13,36 @@ app.use(express.json())
 app.use(cors())
 
 app.use(morgan(function (tokens, request, response) {
-    if (request.method === 'POST'){
-        return [
-    tokens.method(request, response),
-    tokens.url(request, response),
-    tokens.status(request, response),
-    tokens.res(request, response, 'name-length'), '-',
-    tokens['response-time'](request, response), 'ms'
+  if (request.method === 'POST'){
+    return [
+      tokens.method(request, response),
+      tokens.url(request, response),
+      tokens.status(request, response),
+      tokens.res(request, response, 'name-length'), '-',
+      tokens['response-time'](request, response), 'ms'
     ].join(' ') + ' '
     + JSON.stringify(request.body)
-    }
-    return [
+  }
+  return [
     tokens.method(request, response),
     tokens.url(request, response),
     tokens.status(request, response),
     tokens.res(request, response, 'name-length'), '-',
     tokens['response-time'](request, response), 'ms'
-    ].join(' ')
+  ].join(' ')
 }))
 
 
 // .env tiedostossa reitti url:lle
 
-const url = process.env.MONGODB_URI 
+const url = process.env.MONGODB_URI
 
 mongoose.set('strictQuery',false)
 mongoose.connect(url, { family: 4 })
 
 // person schema
 const peopleSchema = new mongoose.Schema({
-  name: { 
+  name: {
     type: String,
     minlength: 3
   },
@@ -51,7 +51,7 @@ const peopleSchema = new mongoose.Schema({
     minlength: 8,
     validate: {
       validator: function(v) {
-        return /^\d{2,3}-\d{3,}$/.test(v);
+        return /^\d{2,3}-\d{3,}$/.test(v)
       },
       message: props => `${props.value} Number format has to have 2 or 3 numbers first then a hyphen and at least 3 numbers after it`
     }
@@ -80,14 +80,14 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.delete('/api/persons/:id',(request, response, next) => {
-    const id = request.params.id
-    Person.findByIdAndDelete(id).then(result => {
-      response.status(204).end()
-    })
+  const id = request.params.id
+  Person.findByIdAndDelete(id).then(
+    response.status(204).end()
+  ) //TARKASTA TOIMIIKO DELETE JOS EI NIIN GITISTÄ VANHA VERSIO
     .catch(error => next(error))
 })
 
-app.get('/api/info',(request, response) => {
+app.get('/api/info',(request, response, next) => {
   Person.countDocuments({}).then(count => {
 
     const today = new Date()
@@ -98,15 +98,15 @@ app.get('/api/info',(request, response) => {
     const hours = today.getHours()
     const minutes = today.getMinutes()
     const seconds = today.getSeconds()
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    const days = ["Sunday", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
     const wordDay = days[dayWord]
     const monthWord = months[month]
     const message = `Phonebook has info for ${count} people. 
                                                                              ${monthWord} ${wordDay} ${day} ${year} ${hours}:${minutes}:${seconds} GMT+0200 (Eastern European Standard Time)`
     response.send(message)
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 
@@ -120,31 +120,29 @@ app.get('/api/persons/:id',(request, response, next) => {
       response.status(404).end()
     }
   })
-  .catch(error => next(error))
+    .catch(error => next(error))
 })
 
 app.post('/api/persons',(request, response, next) => {
-    const body = request.body
+  const body = request.body
 
-      if (!body.name) {
-          return response.status(400).json({error: 'name missing'
-          })
-      }
-
-      if (!body.number) {
-          return response.status(400).json({ error: 'number missing' })
-      }
-        
-      const person = new Person({
-          name: body.name,
-          number: body.number,
-        })
-        
-      person.save().then(savedPerson => {
-        response.json(savedPerson)
-        })
-      .catch(error => next(error))
+  if (!body.name) {
+    return response.status(400).json({ error: 'name missing'
     })
+  }
+
+  if (!body.number) {
+    return response.status(400).json({ error: 'number missing' })
+  }
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
+  person.save().then(savedPerson => {
+    response.json(savedPerson)
+  })
+    .catch(error => next(error))
+})
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
 }
@@ -157,10 +155,10 @@ app.put('/api/persons/:id', (request, response, next) => {
     person.number = body.number
     return person.save()
   })
-  .then(savedPerson => {
-        response.json(savedPerson)
-  })
-  .catch(error => next(error))
+    .then(savedPerson => {
+      response.json(savedPerson)
+    })
+    .catch(error => next(error))
 })
 
 
@@ -177,11 +175,11 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  }
   else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
   }
-  
+
 
   next(error)
 }

@@ -22,23 +22,23 @@ const noteSchema = new mongoose.Schema({
 const Note = mongoose.model('Note', noteSchema)
 
 const note = new Note({
-    content: content_i,
-    number: number_i
+  content: content_i,
+  number: number_i
 })
 
 if (!note.content) {
-    console.log('Phonebook:')
-    Note.find({}).then(result => {
-      result.forEach(note => {
-        console.log(note.content, note.number)
-      })
-      mongoose.connection.close()
+  console.log('Phonebook:')
+  Note.find({}).then(result => {
+    result.forEach(note => {
+      console.log(note.content, note.number)
     })
+    mongoose.connection.close()
+  })
 } else {
-    note.save().then(result => {
+  note.save().then(() => {
     console.log(`added ${note.content} number ${note.number} to phonebook`)
     mongoose.connection.close()
-    })
+  })
 }
 
 
