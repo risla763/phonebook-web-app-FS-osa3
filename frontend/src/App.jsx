@@ -85,13 +85,14 @@ const App = () => {
           const UpdatedPerson = { name: newName, number: newNumber, id: String(person.id)}
           console.log("update the object", UpdatedPerson)
 
-          personsService.update(person.id, UpdatedPerson).then(response => {
-                setPersons(persons.map(person => person.id === IsInList.id ? response.data : person))
+          personsService
+            .update(person.id, UpdatedPerson).then(response => {
+                setPersons(persons.map(personn => personn.id === person.id ? response.data : personn))
                 setUpdateMessage(`Updated ${newName}'s number to ${newNumber}`)
                 setTimeout(() => 
                   setUpdateMessage(null), 5000)})
             .catch(error => { 
-              setErrorMessage(`Information of ${newName} has already been removed from server`)
+              setErrorMessage(error.response.data.error)
               setTimeout(() => {
               setErrorMessage(null)}, 5000)
             })

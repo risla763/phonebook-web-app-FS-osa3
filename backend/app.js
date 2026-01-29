@@ -152,7 +152,7 @@ const unknownEndpoint = (request, response) => {
 app.put('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
   const body = request.body
-  console.log('puttiin tultu', body)
+  console.log('Tuliko put koodiin?', body)
   Person.findById(id).then(person => {
     person.number = body.number
     person.save()
